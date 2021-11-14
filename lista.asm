@@ -2,6 +2,10 @@ global _start
 extern printf
 
 section .data
+	slist dd 0
+	cclist dd 0
+	wclist dd 0
+
 	opc0 db "\n---------------------------------------------------|\nMenu principal: \n1) Crear categoria \n2) Pasar a categoria siguiente \n3) Volver a categoria anterior \n4) Listar categorias \n5) Borrar categoria seleccionada \n6) Anexar un objeto a la categoria seleccionada \n7) Borrar objeto \n8) Listar objetos de la categoria seleccionada \n9) Salir \n\n"
 	length1 equ $-opc0
 	consulta db "Ingrese una opcion: %i"
@@ -35,3 +39,50 @@ _start:
 	mov eax, 1
 	mov ebx, 0
 	int 0x80
+
+listarcategory:
+	mov esi, 0
+	mov ebp, esp
+	mov eax, [cclist]
+	push eax
+	cmp eax, 0
+	je finloop2
+	loop2:
+	    pop eax
+		mov ebx, [wclist]
+		cmp eax, ebx
+		push eax
+		jne finif5
+
+		mov eax, 4
+		mov ebx, 1
+		mov ecx, ast
+		mov edx, 1
+		int 0x80
+
+		finif5:
+			mov eax, 4
+			mov ebx, 1
+			pop eax
+			mov ecx, [eax+8]
+			push eax
+			mov edx, 16
+			int 0x80
+
+			mov eax, 4
+			mov ebx, 1
+			mov ecx, salto
+			mov edx, 2
+			int 0x80
+
+			pop eax
+			mov eax, [eax+12]
+			push eax
+			mov esi, 1
+
+			cmp eax, [cclist]
+			je finloop2
+			jmp loop2
+	finloop2:
+	mov esp, ebp
+	ret
