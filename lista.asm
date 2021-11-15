@@ -560,3 +560,71 @@ listarobject:
 	finloop3:
 	mov esp, ebp
 	ret
+
+
+nextcategory:
+      mov eax, 0
+      mov ebx, wclist ;Cargo la direccion de la categoria seleccionada
+      je finif14 ;Verifico si hay algun nodo en la lista de categorias
+
+      mov eax, 1
+      mov ecx, [ebx+12] ;Cargo la direccion de la siguiente categoria
+      mov [wclist], ecx ;NO SE SI VA (DESPUES REVISO)  sw $t1, wclist
+
+      finif14:
+      ret
+
+prevcategory:
+      mov eax, 0
+      mov ebx, wclist ;Cargo la direccion de la categoria seleccionada
+      je finif14
+
+      mov eax, 1
+      mov ecx, [ebx]
+      mov [wclist], ecx ;NO SE SI VA (DESPUES REVISO)  sw $t1, wclist
+
+      finif17:
+      ret
+
+
+
+newcategory:
+      ;move $t7, $a0 #SUPONGO Q A0 ESTA EN EAX
+
+      ;addi $sp, $sp, -4  ¿CREO Q NO ES NECESARIO?
+      ;sw $ra, 0($sp)
+
+      call smalloc
+
+      mov ebx, 0 ;t4 es ebx
+      ;SUPONGO Q V0 (LO QUE RETORNO SMALLOC ES ecx)
+      mov [ecx+4], ebx
+      mov [ecx+8], eax
+
+      ;dejo de usar t7(eax) y t4(ebx), los puedo reutilizar
+
+      ; t1 = eax
+      mov eax, cclist ;Cargo la direccion del primer nodo de la lista de categorias
+      mov cclist, ecx ;Actualizo dicha direccion
+      mov ebx, 0
+      je first ;Verifico si ya habia categorias
+
+      ;t3 = ebx
+      mov ebx, [eax + 0] ;Cargo la direccion del nodo anterior
+      mov [ecx + 0], ebx ;La guardo en el nodo nuevo
+      mov [ebx + 12], ecx ;Actualizo la parte del nodo siguiente del nodo anterior con el nodo nuevo
+      mov [eax + 0], ecx ;Actualizo la parte del nodo anterior del nodo siguiente con el nodo nuevo
+      mov [ecx + 12], eax ;Actualizo la parte del nodo siguiente del nodo nuevo con el nodo correspondiente
+
+      jmp fin
+
+      first:
+      mov [ecx + 0], ecx ;Al ser el primer nodo, tiene que apuntarse a si mismo
+      mov [ecx + 12], ecx
+      mov wclist, ecx ;Actualizo la direccion de la categoria seleccionada con el nodo nuevo
+
+      fin:
+      ;lw $ra,0($sp)
+      ;addi $sp, $sp, 4
+      ;jr $ra
+      ret ;?
