@@ -628,3 +628,76 @@ newcategory:
       ;addi $sp, $sp, 4
       ;jr $ra
       ret ;?
+
+newobject:
+      ;addi $sp, $sp, -4
+      ;sw $ra, 0($sp)
+
+      ;v0 es eax
+      mov eax, 0
+
+      ;t1 es ebx
+      mov ebx, wclist ;Cargo la direccion de la categoria seleccionada
+      je fin5 ;Verifico si hay algun nodo en la lista de categorias
+      ;DEBERIA GUARDAR EN LA PILA EBX?
+
+      mov eax, 4  
+      mov ebx, 1  
+      mov ecx, opc2 ;"Ingrese nombre del objeto: "
+      mov edx, len2
+      int 0x80
+      ;-------------------------------------------
+      call saltodelinea
+      ;-------------------------------------------
+      
+      call smalloc ;Pido un bloque de memoria
+
+      ;SUPONGO Q LO QUE RETORNO SMALLOC ESTA EN EAX
+
+      ;move $a0, $v0 #Muevo la direccion del bloque obtenido a $a0
+      ;li $v0, 8  #Guardo el nombre de la nueva categoria en el bloque creado
+      ;syscall
+
+      ;t7 es ebx
+      ;move $t7, $a0 #Muevo el argumento a un temporal
+
+      call smalloc ;Pido un bloque de memoria
+
+
+      mov [eax + 8], ebx ;Guardo la direccion del nodo con el nombre del objeto
+      mov ecx, wclist ;Cargo la direccion de la categoria seleccionada (ECX es t1)
+      mov ecx, [ecx + 4] ;Cargo la direccion de la lista de objetos de dicha categoria
+
+      ;DEBERIA GUARDAR EAX (DESPUES LO HAGO)
+      mov eax, 0
+      mov ebx, ecx
+      je first2 ;Verifico si hay objetos en la lista
+
+      ;EBX es t3 y EAX es v0
+      mov ebx, [ecx + 0] ;Cargo la direccion del nodo anterior
+      mov [eax + 0], ebx ;La guardo en el nodo nuevo
+      mov [ebx + 12], eax ;Actualizo la parte del nodo siguiente del nodo anterior con el nodo nuevo
+      mov [ecx + 0], eax ;Actualizo la parte del nodo anterior del nodo siguiente con el nodo nuevo
+      mov [eax + 12], ecx ;Actualizo la parte del nodo siguiente del nodo nuevo con el nodo correspondiente
+
+      ;EDX es t4
+      mov edx, [ecx + 4] ;Cargo la ID del nodo siguiente
+      add edx, 1 ;Le sumo 1
+      mov [eax + 4], edx ;Actualizo la ID del nuevo nodo
+
+      jne fin2 ;eax y ebx van a ser distintos, entonces salto a fin2
+
+      first2: 
+      mov [eax + 0], eax ;Al ser el primer nodo, tiene que apuntarse a si mismo
+      mov [eax + 12], eax
+      mov [eax + 4], 1 ;Actualizo la ID del nuevo nodo con '1'
+      
+      fin2:
+      mov ecx, wclist ;Cargo la direccion de la categoria seleccionada
+      mov [ecx + 4], eax ;Actualizo la direccion que apunta a la lista de objetos
+      mov eax, 1
+
+      fin5:
+      ;lw $ra,0($sp)
+      ;addi $sp, $sp, 4
+      ;jr $ra
