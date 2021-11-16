@@ -564,12 +564,12 @@ listarobject:
 
 nextcategory:
       mov eax, 0
-      mov ebx, wclist ;Cargo la direccion de la categoria seleccionada
+      mov ebx, wclist ;Cargo la direccion de la categoria seleccionada, iria [wclist] si fuera el contenido
       je finif14 ;Verifico si hay algun nodo en la lista de categorias
 
       mov eax, 1
       mov ecx, [ebx+12] ;Cargo la direccion de la siguiente categoria
-      mov [wclist], ecx ;NO SE SI VA (DESPUES REVISO)  sw $t1, wclist
+      mov [wclist], ecx
 
       finif14:
       ret
@@ -581,7 +581,7 @@ prevcategory:
 
       mov eax, 1
       mov ecx, [ebx]
-      mov [wclist], ecx ;NO SE SI VA (DESPUES REVISO)  sw $t1, wclist
+      mov [wclist], ecx 
 
       finif17:
       ret
@@ -589,12 +589,22 @@ prevcategory:
 
 
 newcategory:
+      mov esi, 0 ;para poder usar la PILA
+      mov ebp, esp
+
       ;move $t7, $a0 #SUPONGO Q A0 ESTA EN EAX
 
       ;addi $sp, $sp, -4  ¿CREO Q NO ES NECESARIO?
       ;sw $ra, 0($sp)
 
+      push eax ; para que no se pierda en la llamada
+
       call smalloc
+
+      ;LO QUE RETORNA SMALLOC POR DEFECTO DEBERIA ESTAR EN EAX
+      mov ecx, eax
+
+      pop eax ;vuelve a ser el argumento de la funcion
 
       mov ebx, 0 ;t4 es ebx
       ;SUPONGO Q V0 (LO QUE RETORNO SMALLOC ES ecx)
@@ -685,7 +695,7 @@ newobject:
       add edx, 1 ;Le sumo 1
       mov [eax + 4], edx ;Actualizo la ID del nuevo nodo
 
-      jne fin2 ;eax y ebx van a ser distintos, entonces salto a fin2
+      jmp fin2 ;eax y ebx van a ser distintos, entonces salto a fin2
 
       first2: 
       mov [eax + 0], eax ;Al ser el primer nodo, tiene que apuntarse a si mismo
