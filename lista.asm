@@ -711,3 +711,119 @@ newobject:
       ;lw $ra,0($sp)
       ;addi $sp, $sp, 4
       ;jr $ra
+
+delcategory:
+      mov esb, esp
+
+	;addi $sp, $sp, -4
+	;sw $ra, 0($sp)
+
+	;t6 es ebx 
+	;v0 es esi
+
+      mov ebx, 0
+      mov esi, 0
+
+	;ecx es t7
+
+      mov ecx, [wclist]
+      cmp ecx, 0
+      je fin4
+
+      mov esi, 1
+      mov ecx, [ecx+4]
+      cmp ecx, 0
+      je finloop
+      ;edx es t1
+      mov edx, ecx
+
+
+	loop:
+            ;eax es t3
+            move eax, [edx+12]
+            mov edi, [edx+8] 
+            call sfree
+
+            mov edi, edx
+            call sfree
+
+            mov edx, eax
+            cmp ecx, edx
+            je finloop
+
+            jmp loop
+
+	finloop:
+	;lw $t7, wclist($0) #Cargo la direccion de la categoria seleccionada
+      mov ecx, [wclist]
+	;lw $t3, cclist($0) #Cargo la direccion del primer nodo de la lista de categorias
+      mov eax, [cclist]
+
+	;lw $t4, 12($t7) #Cargo la direccion del siguiente nodo
+      ;edi es t4
+      mov edi, [ecx+12]
+
+	;bne $t4, $t7, finif4 #Si la direccion del siguiente nodo es igual a la categoria seleccionada, es porque hay 1 sola categoria
+      cmp edi, ecx
+      jne finif4
+
+	;sw $0, cclist #Pongo en 0 a la direccion del primer nodo de la lista de categorias
+      mov [cclist], 0
+
+	;j fin3
+      jmp fin3
+
+	finif4:
+
+	;bne $t3, $t7, finif3 #Verifico la categoria a borrar es la primera de la lista
+      cmp eax, ecx
+      jne finif3
+
+	;lw $t1, 12($t7) #Cargo la direccion del siguiente nodo
+      mov edx, [ecx+12]
+	;sw $t1, cclist #Actualizo la direccion del primer nodo de la lista de categorias 
+      mov [cclist], edx
+
+	finif3:
+	;lw $t1, 12($t7) #Cargo la direccion del siguiente nodo
+      mov edx, [ecx+12]
+	;lw $t2, 0($t7) #Cargo la direccion del nodo anterior
+      ;eax pasa a ser t2
+      mov eax, [ecx]
+
+	;sw $t2, 0($t1) #Actualizo la parte de la direccion del nodo anterior del nodo anterior
+      mov [edx], eax
+	;sw $t1, 12($t2) #Actualizo la parte de la direccion del siguiente nodo del nodo siguiente
+      mov [eax+12], edx
+
+	;move $t6, $t1 
+      mov ebx, edx
+
+	fin3:
+	;lw $t7, wclist($0) #Cargo la direccion de la categoria seleccionada
+      mov ecx, [wclist]
+
+	;lw $t0, 8($t7) #Cargo la direccion del nodo que contiene el nombre de la categoria
+      ;edx pasa a ser t0
+      mov edx, [ecx+8]
+	;move $a0, $t0 
+      mov edi, edx
+	;jal sfree #Libero dicho nodo
+      call sfree
+
+	;move $a0, $t7
+      mov edi, ecx
+	;jal sfree #Libero el nodo de la categoria
+      call sfree
+
+	;sw $t6, wclist($0) #Actualizo la direccion de la categoria seleccionada con la siguiente categoria
+      mov [wclist], ebx
+
+	fin4:
+
+	;lw $ra,0($sp)
+
+	;addi $sp, $sp, 4
+	;jr $ra
+      mov esp, ebp
+	ret
