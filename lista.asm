@@ -1,9 +1,9 @@
 global _start
 
 section .data
-	slist dd 0
-	cclist dd 0
-	wclist dd 0
+    slist dd 0
+    cclist dd 0
+    wclist dd 0
 
 opc0 db "\n---------------------------------------------------|\nMenu principal: \n1) Crear categoria \n2) Pasar a categoria siguiente \n3) Volver a categoria anterior \n4) Listar categorias \n5) Borrar categoria seleccionada \n6) Anexar un objeto a la categoria seleccionada \n7) Borrar objeto \n8) Listar objetos de la categoria seleccionada \n9) Salir \n\n",0xa, 0xd,'$'
 len0 equ $-opc0
@@ -454,112 +454,112 @@ mov ebx, 0
 int 0x80
 
 listarcategory:
-	mov esi, 0
-	mov ebp, esp
-	mov eax, [cclist]
-	push eax
-	cmp eax, 0
-	je finloop2
-	loop2:
-	    pop eax
-		mov ebx, [wclist]
-		cmp eax, ebx
-		push eax
-		jne finif5
+    mov esi, 0
+    mov ebp, esp
+    mov eax, [cclist]
+    push eax
+    cmp eax, 0
+    je finloop2
+    loop2:
+        pop eax
+        mov ebx, [wclist]
+        cmp eax, ebx
+        push eax
+        jne finif5
 
-		mov eax, 4
-		mov ebx, 1
-		mov ecx, ast
-		mov edx, 1
-		int 0x80
+        mov eax, 4
+        mov ebx, 1
+        mov ecx, ast
+        mov edx, 1
+        int 0x80
 
-		finif5:
-			mov eax, 4
-			mov ebx, 1
-			pop eax
-			mov ecx, [eax+8]
-			push eax
-			mov edx, 16
-			int 0x80
+        finif5:
+            mov eax, 4
+            mov ebx, 1
+            pop eax
+            mov ecx, [eax+8]
+            push eax
+            mov edx, 16
+            int 0x80
 
-			mov eax, 4
-			mov ebx, 1
-			mov ecx, salto
-			mov edx, lensalto
-			int 0x80
+            mov eax, 4
+            mov ebx, 1
+            mov ecx, salto
+            mov edx, lensalto
+            int 0x80
 
-			pop eax
-			mov eax, [eax+12]
-			push eax
-			mov esi, 1
+            pop eax
+            mov eax, [eax+12]
+            push eax
+            mov esi, 1
 
-			cmp eax, [cclist]
-			je finloop2
-			jmp loop2
-	finloop2:
-	mov esp, ebp
-	ret
+            cmp eax, [cclist]
+            je finloop2
+            jmp loop2
+    finloop2:
+    mov esp, ebp
+    ret
 
 listarobject:
-	mov esi, 0
-	mov ebp, esp
+    mov esi, 0
+    mov ebp, esp
 
-	mov eax, [cclist]
-	cmp eax, 0
-	je finloop3
-	mov esi, 3
+    mov eax, [cclist]
+    cmp eax, 0
+    je finloop3
+    mov esi, 3
 
-	mov eax, [eax+4]
-	cmp eax, 0
-	je finloop3
+    mov eax, [eax+4]
+    cmp eax, 0
+    je finloop3
 
-	push eax
-	mov edi, eax
+    push eax
+    mov edi, eax
 
-	loop3:
-		pop eax
-		push eax
-		mov eax, [eax+4]
-		add eax, 0x30
-		mov [outputBuffer], eax
-		mov eax, 4
-		mov ebx, 1
-		mov ecx, outputBuffer
-		mov edx, 1
-		int 0x80
+    loop3:
+        pop eax
+        push eax
+        mov eax, [eax+4]
+        add eax, 0x30
+        mov [outputBuffer], eax
+        mov eax, 4
+        mov ebx, 1
+        mov ecx, outputBuffer
+        mov edx, 1
+        int 0x80
 
-		mov eax, 4
-		mov ebx, 1
-		mov ecx, pun
-		mov edx, lenpun
-		int 0x80
+        mov eax, 4
+        mov ebx, 1
+        mov ecx, pun
+        mov edx, lenpun
+        int 0x80
 
-		pop eax
-		push eax
-		mov ecx, [eax+8]
-		mov eax, 4
-		mov ebx, 1
-		mov edx, 16
-		int 0x80
-
-
-		mov eax, 4
-		mov ebx, 1
-		mov ecx, salto
-		mov edx, lensalto
-		int 0x80
+        pop eax
+        push eax
+        mov ecx, [eax+8]
+        mov eax, 4
+        mov ebx, 1
+        mov edx, 16
+        int 0x80
 
 
-		pop eax
-		mov eax, [eax+12]
-		push eax
-		mov esi, 1
-		cmp eax, edi
-		je finloop3
-		jmp loop3
-	finloop3:
-	mov esp, ebp
-	ret
+        mov eax, 4
+        mov ebx, 1
+        mov ecx, salto
+        mov edx, lensalto
+        int 0x80
+
+
+        pop eax
+        mov eax, [eax+12]
+        push eax
+        mov esi, 1
+        cmp eax, edi
+        je finloop3
+        jmp loop3
+    finloop3:
+    mov esp, ebp
+    ret
 
 
 nextcategory:
@@ -715,16 +715,16 @@ newobject:
 delcategory:
       mov esb, esp
 
-	;addi $sp, $sp, -4
-	;sw $ra, 0($sp)
+    ;addi $sp, $sp, -4
+    ;sw $ra, 0($sp)
 
-	;t6 es ebx 
-	;v0 es esi
+    ;t6 es ebx 
+    ;v0 es esi
 
       mov ebx, 0
       mov esi, 0
 
-	;ecx es t7
+    ;ecx es t7
 
       mov ecx, [wclist]
       cmp ecx, 0
@@ -738,7 +738,7 @@ delcategory:
       mov edx, ecx
 
 
-	loop:
+    loop:
             ;eax es t3
             move eax, [edx+12]
             mov edi, [edx+8] 
@@ -753,77 +753,171 @@ delcategory:
 
             jmp loop
 
-	finloop:
-	;lw $t7, wclist($0) #Cargo la direccion de la categoria seleccionada
+    finloop:
+    ;lw $t7, wclist($0) #Cargo la direccion de la categoria seleccionada
       mov ecx, [wclist]
-	;lw $t3, cclist($0) #Cargo la direccion del primer nodo de la lista de categorias
+    ;lw $t3, cclist($0) #Cargo la direccion del primer nodo de la lista de categorias
       mov eax, [cclist]
 
-	;lw $t4, 12($t7) #Cargo la direccion del siguiente nodo
+    ;lw $t4, 12($t7) #Cargo la direccion del siguiente nodo
       ;edi es t4
       mov edi, [ecx+12]
 
-	;bne $t4, $t7, finif4 #Si la direccion del siguiente nodo es igual a la categoria seleccionada, es porque hay 1 sola categoria
+    ;bne $t4, $t7, finif4 #Si la direccion del siguiente nodo es igual a la categoria seleccionada, es porque hay 1 sola categoria
       cmp edi, ecx
       jne finif4
 
-	;sw $0, cclist #Pongo en 0 a la direccion del primer nodo de la lista de categorias
+    ;sw $0, cclist #Pongo en 0 a la direccion del primer nodo de la lista de categorias
       mov [cclist], 0
 
-	;j fin3
+    ;j fin3
       jmp fin3
 
-	finif4:
+    finif4:
 
-	;bne $t3, $t7, finif3 #Verifico la categoria a borrar es la primera de la lista
+    ;bne $t3, $t7, finif3 #Verifico la categoria a borrar es la primera de la lista
       cmp eax, ecx
       jne finif3
 
-	;lw $t1, 12($t7) #Cargo la direccion del siguiente nodo
+    ;lw $t1, 12($t7) #Cargo la direccion del siguiente nodo
       mov edx, [ecx+12]
-	;sw $t1, cclist #Actualizo la direccion del primer nodo de la lista de categorias 
+    ;sw $t1, cclist #Actualizo la direccion del primer nodo de la lista de categorias 
       mov [cclist], edx
 
-	finif3:
-	;lw $t1, 12($t7) #Cargo la direccion del siguiente nodo
+    finif3:
+    ;lw $t1, 12($t7) #Cargo la direccion del siguiente nodo
       mov edx, [ecx+12]
-	;lw $t2, 0($t7) #Cargo la direccion del nodo anterior
+    ;lw $t2, 0($t7) #Cargo la direccion del nodo anterior
       ;eax pasa a ser t2
       mov eax, [ecx]
 
-	;sw $t2, 0($t1) #Actualizo la parte de la direccion del nodo anterior del nodo anterior
+    ;sw $t2, 0($t1) #Actualizo la parte de la direccion del nodo anterior del nodo anterior
       mov [edx], eax
-	;sw $t1, 12($t2) #Actualizo la parte de la direccion del siguiente nodo del nodo siguiente
+    ;sw $t1, 12($t2) #Actualizo la parte de la direccion del siguiente nodo del nodo siguiente
       mov [eax+12], edx
 
-	;move $t6, $t1 
+    ;move $t6, $t1 
       mov ebx, edx
 
-	fin3:
-	;lw $t7, wclist($0) #Cargo la direccion de la categoria seleccionada
+    fin3:
+    ;lw $t7, wclist($0) #Cargo la direccion de la categoria seleccionada
       mov ecx, [wclist]
 
-	;lw $t0, 8($t7) #Cargo la direccion del nodo que contiene el nombre de la categoria
+    ;lw $t0, 8($t7) #Cargo la direccion del nodo que contiene el nombre de la categoria
       ;edx pasa a ser t0
       mov edx, [ecx+8]
-	;move $a0, $t0 
+    ;move $a0, $t0 
       mov edi, edx
-	;jal sfree #Libero dicho nodo
+    ;jal sfree #Libero dicho nodo
       call sfree
 
-	;move $a0, $t7
+    ;move $a0, $t7
       mov edi, ecx
-	;jal sfree #Libero el nodo de la categoria
+    ;jal sfree #Libero el nodo de la categoria
       call sfree
 
-	;sw $t6, wclist($0) #Actualizo la direccion de la categoria seleccionada con la siguiente categoria
+    ;sw $t6, wclist($0) #Actualizo la direccion de la categoria seleccionada con la siguiente categoria
       mov [wclist], ebx
 
-	fin4:
+    fin4:
 
-	;lw $ra,0($sp)
+    ;lw $ra,0($sp)
 
-	;addi $sp, $sp, 4
-	;jr $ra
+    ;addi $sp, $sp, 4
+    ;jr $ra
       mov esp, ebp
-	ret
+    ret
+
+      delobject:
+    mov esb, esp
+    
+    mov esi, 0
+
+    mov ecx, [wclist]
+    cmp ecx, 0
+    je finwhile
+    mov esi, 4
+    mov edx, [ecx+4]
+    cmp edx, 0
+    je finwhile
+
+    mov eax, 4  
+    mov ebx, 1  
+    mov ecx, opc3
+    mov edx, len3
+    int 0x80
+    call saltodelinea
+
+    mov  eax, 3
+    mov  ebx, 0
+    mov  ecx, user_input2
+    mov  edx, user_input_length2
+    int  80h
+    call saltodelinea
+
+    mov esi, 3
+    mov ecx, [wclist]
+    mov eax, [ecx+4]
+
+    mov ebx, [eax+12]
+    mov edx, [eax+0]
+    cmp edx, eax
+    jne finif2
+
+    mov ebx, [eax+4]
+    mov edi, [user_input2]
+    cmp edi, ebx
+    jne finwhile
+
+    mov eax, 1 ;no se si esta bien
+    mov [ecx+4], 0
+
+    mov esi, edi
+
+    mov edi, [eax+8]
+    call sfree
+
+    mov edi, eax
+    call sfree
+
+    jmp finwhile
+    finif2:
+
+    mov ebx, [eax+4]
+    cmp ebx, esi
+    jne while
+
+    mov edx, [eax+12]
+    mov ecx, [wclist]
+    mov [ecx+4], edx
+    mov ecx, eax
+
+      while:
+            mov ebx, [eax+1]
+            cmp ebx, esi
+            jne finif
+
+            mov esi, [eax+0]
+            mov edx, [eax+12]
+            mov [esi+12], edx
+            mov [edx+0], esi
+
+            mov edi, [eax+8]
+            call sfree
+
+            mov edi, eax
+            call sfree
+
+            jmp finwhile
+            finif:
+
+            mov edx, [eax+12]
+            mov eax, edx
+
+            cmp ecx, eax
+            je finwhile
+            jmp while
+      finwhile:
+
+      mov esp, ebp
+    ret
