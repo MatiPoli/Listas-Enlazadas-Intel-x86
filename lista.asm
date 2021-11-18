@@ -39,9 +39,6 @@ lenm5 equ $-msj5
 msj6 db "Se ha eliminado la categoria seleccionada!",0xa, 0xd,'$'
 lenm6 equ $-msj6
 
-msj6 db "Se ha eliminado la categoria seleccionada!",0xa, 0xd,'$'
-lenm6 equ $-msj6
-
 msj7 db "No hay categorias creadas :(",0xa, 0xd,'$'
 lenm7 equ $-msj7
 
@@ -75,6 +72,9 @@ lensalto equ $-salto
 section .bss
 user_input resb 25    ; user input
  user_input_length equ $- user_input
+
+user_input1 resb 1    ; user input
+ user_input_length1 equ $- user_input1
 
 outputBuffer    resb    4     
 
@@ -110,19 +110,22 @@ while2:
          
       mov  eax, 3 ; sys_read
       mov  ebx, 0 ; stdin
-      mov  ecx, user_input ; user input
-      mov  edx, user_input_length ; max length
+      mov  ecx, user_input1 ; user input
+      mov  edx, user_input_length1 ; max length
       int  80h
       ;-------------------------------------------
       call saltodelinea
       ;-------------------------------------------
 
-      mov eax,1
+      mov eax, 0;
+      mov eax, [user_input]
+
+      sub eax, 0x30
       cmp eax,1 ;compare               ;https://www.youtube.com/watch?v=cFGJhn97e3s&list=PLmxT2pVYo5LB5EzTPZGfFN0c2GDiSXgQe&index=2
       jl opc  ;Jump if less
-      mov ebx,9
-      cmp ebx,9 ;compare
+      cmp eax,9 ;compare
       jg opc ;Jump if greater
+
       jmp finif18
 
 
@@ -132,25 +135,26 @@ while2:
       mov ecx, msj13 ;"Ha ingresado una opcion incorrecta!"
       mov edx, lenm13
       int 0x80 
-
+      call saltodelinea
+      jmp while2
       finif18:
-      cmp ecx,1
+      cmp eax,1
       je opcion1
-      cmp ecx,2
+      cmp eax,2
       je opcion2
-      cmp ecx,3
+      cmp eax,3
       je opcion3
-      cmp ecx,4
+      cmp eax,4
       je opcion4
-      cmp ecx,5
+      cmp eax,5
       je opcion5
-      cmp ecx,6
+      cmp eax,6
       je opcion6
-      cmp ecx,7
+      cmp eax,7
       je opcion7
-      cmp ecx,8
+      cmp eax,8
       je opcion8
-      cmp ecx,9
+      cmp eax,9
       je finwhile2
 
       opcion1:
@@ -168,6 +172,14 @@ while2:
       ;li $v0, 8  #Guardo el nombre de la nueva categoria en el bloque creado
       ;syscall
       ;-------------------------------------------
+      call smalloc
+      push eax
+      mov  ecx, eax ; user input
+      mov  eax, 3 ; sys_read
+      mov  ebx, 0 ; stdin
+      mov  edx, 16 ; max length
+      int  80h
+      pop eax
       call newcategory ;Obtengo la nueva categoria            ;PONER UN RET CUANDO HAGAN FUNCIONES CON CALL
       jmp while2
 
@@ -177,7 +189,7 @@ while2:
       ;'1' si es que hay categorias creadas anteriormente
       ;'0' si es que no hay categorias creadas anteriormente
 
-      cmp eax,0
+      cmp esi,0
       jne finif15
       mov eax, 4  
       mov ebx, 1  
@@ -207,7 +219,7 @@ while2:
       ;'1' si es que hay categorias creadas anteriormente
       ;'0' si es que no hay categorias creadas anteriormente
 
-      cmp eax,0
+      cmp esi,0
       jne finif16
       mov eax, 4  
       mov ebx, 1  
@@ -240,7 +252,7 @@ while2:
       ;'1' si es que hay categorias creadas anteriormente
       ;'0' si es que no hay categorias creadas anteriormente
 
-      cmp eax,0
+      cmp esi,0
       jne finif6 ;Verifico si hay categorias creadas
 
       mov eax, 4  
@@ -261,7 +273,7 @@ while2:
       ;'1' si es que hay categorias creadas anteriormente
       ;'0' si es que no hay categorias creadas anteriormente
 
-      cmp eax, 0
+      cmp esi, 0
       jne finif7
       mov eax, 4  
       mov ebx, 1  
@@ -274,7 +286,7 @@ while2:
       jmp while2
 
       finif7:
-    mov eax, 4  
+      mov eax, 4  
       mov ebx, 1  
       mov ecx, msj6 ;"Se ha eliminado la categoria seleccionada!"
       mov edx, lenm6
@@ -291,7 +303,7 @@ while2:
       ;'1' si es que hay categorias creadas anteriormente
       ;'0' si es que no hay categorias creadas anteriormente
 
-      cmp eax, 0
+      cmp esi, 0
       jne finif8
       mov eax, 4  
       mov ebx, 1  
@@ -307,7 +319,7 @@ while2:
       ;-------------------------------------------
       call saltodelinea
       ;-------------------------------------------
-    mov eax, 4  
+      mov eax, 4  
       mov ebx, 1  
       mov ecx, msj8 ;"Se ha aniadido el objeto a la categoria seleccionada!"
       mov edx, lenm8
@@ -325,7 +337,7 @@ while2:
       ;'3' si es que ha ingresado un id incorrecto o que no existe
       ;'4' si es que no hay objetos en la categoria seleccionada
 
-      cmp eax,0
+      cmp esi,0
       jne finif9
       mov eax, 4  
       mov ebx, 1  
@@ -338,7 +350,7 @@ while2:
       jmp while2
 
       finif9:
-      cmp eax,3
+      cmp esi,3
       jne finif10
       mov eax, 4  
       mov ebx, 1  
@@ -351,7 +363,7 @@ while2:
       jmp while2
 
       finif10:
-      cmp eax,4
+      cmp esi,4
       jne finif11
       mov eax, 4  
       mov ebx, 1  
@@ -396,7 +408,7 @@ while2:
       ;'0' si es que no hay categorias creadas anteriormente
       ;'3' si es que no hay objetos en la categoria seleccionada
 
-      cmp eax,0
+      cmp esi ,0
       jne finif12
 
       mov eax, 4  
@@ -409,7 +421,7 @@ while2:
       ;-------------------------------------------
 
       finif12:
-      cmp eax,3
+      cmp esi,3
       jne while2
       mov eax, 4  
       mov ebx, 1  
@@ -420,11 +432,6 @@ while2:
       call saltodelinea
       ;-------------------------------------------
       jmp while2
-
-
-
-
-
 
    finwhile2:
    ;-------------------------------------------
@@ -440,18 +447,18 @@ while2:
    ;addi $sp, $sp, 4
    ;jr $ra
    ;-------------------------------------------
+   mov eax, 1
+   mov ebx, 0
+   int 0x80
 
-   saltodelinea:
-    mov eax, 4  
-    mov ebx, 1  
-    mov ecx, salto ;"Ingrese una opcion: "
-    mov edx, lensalto
-    int 0x80
-    ret
- 
-mov eax, 1
-mov ebx, 0
-int 0x80
+saltodelinea:
+	mov eax, 4  
+	mov ebx, 1  
+	mov ecx, salto ;"Ingrese una opcion: "
+	mov edx, lensalto
+	int 0x80
+	ret
+
 
 listarcategory:
     mov esi, 0
@@ -563,11 +570,12 @@ listarobject:
 
 
 nextcategory:
-      mov eax, 0
-      mov ebx, wclist ;Cargo la direccion de la categoria seleccionada, iria [wclist] si fuera el contenido
+      mov esi, 0
+      mov ebx, [wclist] ;Cargo la direccion de la categoria seleccionada, iria [wclist] si fuera el contenido
+      cmp ebx, 0
       je finif14 ;Verifico si hay algun nodo en la lista de categorias
 
-      mov eax, 1
+      mov esi, 1
       mov ecx, [ebx+12] ;Cargo la direccion de la siguiente categoria
       mov [wclist], ecx
 
@@ -575,11 +583,12 @@ nextcategory:
       ret
 
 prevcategory:
-      mov eax, 0
-      mov ebx, wclist ;Cargo la direccion de la categoria seleccionada
-      je finif14
+      mov esi, 0
+      mov ebx, [wclist] ;Cargo la direccion de la categoria seleccionada
+      cmp ebx, 0
+      je finif17
 
-      mov eax, 1
+      mov esi, 1
       mov ecx, [ebx]
       mov [wclist], ecx 
 
@@ -589,69 +598,71 @@ prevcategory:
 
 
 newcategory:
-      mov esi, 0 ;para poder usar la PILA
       mov ebp, esp
+
+
 
       ;move $t7, $a0 #SUPONGO Q A0 ESTA EN EAX
 
       ;addi $sp, $sp, -4  ¿CREO Q NO ES NECESARIO?
       ;sw $ra, 0($sp)
 
-      push eax ; para que no se pierda en la llamada
+      mov edx, eax ; para que no se pierda en la llamada
 
       call smalloc
 
       ;LO QUE RETORNA SMALLOC POR DEFECTO DEBERIA ESTAR EN EAX
       mov ecx, eax
+	 ;vuelve a ser el argumento de la funcion
 
-      pop eax ;vuelve a ser el argumento de la funcion
-
-      mov ebx, 0 ;t4 es ebx
       ;SUPONGO Q V0 (LO QUE RETORNO SMALLOC ES ecx)
-      mov [ecx+4], ebx
-      mov [ecx+8], eax
+      mov dword [ecx+4], 0
+      mov [ecx+8], edx
 
       ;dejo de usar t7(eax) y t4(ebx), los puedo reutilizar
 
       ; t1 = eax
-      mov eax, cclist ;Cargo la direccion del primer nodo de la lista de categorias
-      mov cclist, ecx ;Actualizo dicha direccion
-      mov ebx, 0
+      mov edx, [cclist] ;Cargo la direccion del primer nodo de la lista de categorias
+      mov [cclist], ecx ;Actualizo dicha direccion
+      cmp edx, 0
       je first ;Verifico si ya habia categorias
 
       ;t3 = ebx
-      mov ebx, [eax + 0] ;Cargo la direccion del nodo anterior
-      mov [ecx + 0], ebx ;La guardo en el nodo nuevo
+      mov ebx, [edx] ;Cargo la direccion del nodo anterior
+      mov [ecx], ebx ;La guardo en el nodo nuevo
       mov [ebx + 12], ecx ;Actualizo la parte del nodo siguiente del nodo anterior con el nodo nuevo
-      mov [eax + 0], ecx ;Actualizo la parte del nodo anterior del nodo siguiente con el nodo nuevo
-      mov [ecx + 12], eax ;Actualizo la parte del nodo siguiente del nodo nuevo con el nodo correspondiente
+      mov [edx], ecx ;Actualizo la parte del nodo anterior del nodo siguiente con el nodo nuevo
+      mov [ecx + 12], edx ;Actualizo la parte del nodo siguiente del nodo nuevo con el nodo correspondiente
 
       jmp fin
 
       first:
-      mov [ecx + 0], ecx ;Al ser el primer nodo, tiene que apuntarse a si mismo
+      mov [ecx], ecx ;Al ser el primer nodo, tiene que apuntarse a si mismo
       mov [ecx + 12], ecx
-      mov wclist, ecx ;Actualizo la direccion de la categoria seleccionada con el nodo nuevo
+      mov [wclist], ecx ;Actualizo la direccion de la categoria seleccionada con el nodo nuevo
 
       fin:
       ;lw $ra,0($sp)
       ;addi $sp, $sp, 4
       ;jr $ra
+      mov esp, ebp
       ret ;?
 
 newobject:
+	  mov ebp, esp
       ;addi $sp, $sp, -4
       ;sw $ra, 0($sp)
 
-      ;v0 es eax
-      mov eax, 0
+      ;v0 es esi
+      mov esi, 0
 
       ;t1 es ebx
-      mov ebx, wclist ;Cargo la direccion de la categoria seleccionada
+      mov ebx, [wclist] ;Cargo la direccion de la categoria seleccionada
+      cmp ebx, 0
       je fin5 ;Verifico si hay algun nodo en la lista de categorias
       ;DEBERIA GUARDAR EN LA PILA EBX?
 
-      mov eax, 4  
+      mov esi, 4  
       mov ebx, 1  
       mov ecx, opc2 ;"Ingrese nombre del objeto: "
       mov edx, len2
@@ -664,30 +675,36 @@ newobject:
 
       ;SUPONGO Q LO QUE RETORNO SMALLOC ESTA EN EAX
 
+      mov  ecx, eax
+      mov  eax, 3 ; sys_read
+      mov  ebx, 0 ; stdin
+      mov  edx, 16 ; max length
+      int  80h
+
       ;move $a0, $v0 #Muevo la direccion del bloque obtenido a $a0
       ;li $v0, 8  #Guardo el nombre de la nueva categoria en el bloque creado
       ;syscall
 
       ;t7 es ebx
       ;move $t7, $a0 #Muevo el argumento a un temporal
+      mov ebx, eax
 
       call smalloc ;Pido un bloque de memoria
 
 
       mov [eax + 8], ebx ;Guardo la direccion del nodo con el nombre del objeto
-      mov ecx, wclist ;Cargo la direccion de la categoria seleccionada (ECX es t1)
+      mov ecx, [wclist] ;Cargo la direccion de la categoria seleccionada (ECX es t1)
       mov ecx, [ecx + 4] ;Cargo la direccion de la lista de objetos de dicha categoria
 
       ;DEBERIA GUARDAR EAX (DESPUES LO HAGO)
-      mov eax, 0
-      mov ebx, ecx
+      cmp ecx, 0
       je first2 ;Verifico si hay objetos en la lista
 
       ;EBX es t3 y EAX es v0
-      mov ebx, [ecx + 0] ;Cargo la direccion del nodo anterior
-      mov [eax + 0], ebx ;La guardo en el nodo nuevo
+      mov ebx, [ecx] ;Cargo la direccion del nodo anterior
+      mov [eax], ebx ;La guardo en el nodo nuevo
       mov [ebx + 12], eax ;Actualizo la parte del nodo siguiente del nodo anterior con el nodo nuevo
-      mov [ecx + 0], eax ;Actualizo la parte del nodo anterior del nodo siguiente con el nodo nuevo
+      mov [ecx ], eax ;Actualizo la parte del nodo anterior del nodo siguiente con el nodo nuevo
       mov [eax + 12], ecx ;Actualizo la parte del nodo siguiente del nodo nuevo con el nodo correspondiente
 
       ;EDX es t4
@@ -698,22 +715,25 @@ newobject:
       jmp fin2 ;eax y ebx van a ser distintos, entonces salto a fin2
 
       first2: 
-      mov [eax + 0], eax ;Al ser el primer nodo, tiene que apuntarse a si mismo
+      mov [eax], eax ;Al ser el primer nodo, tiene que apuntarse a si mismo
       mov [eax + 12], eax
-      mov [eax + 4], 1 ;Actualizo la ID del nuevo nodo con '1'
+      mov dword [eax + 4], 1 ;Actualizo la ID del nuevo nodo con '1'
       
       fin2:
-      mov ecx, wclist ;Cargo la direccion de la categoria seleccionada
+      mov ecx, [wclist] ;Cargo la direccion de la categoria seleccionada
       mov [ecx + 4], eax ;Actualizo la direccion que apunta a la lista de objetos
-      mov eax, 1
+      mov esi, 1
 
       fin5:
       ;lw $ra,0($sp)
       ;addi $sp, $sp, 4
       ;jr $ra
 
+      mov esp, ebp
+      ret
+
 delcategory:
-      mov esb, esp
+      mov ebp, esp
 
     ;addi $sp, $sp, -4
     ;sw $ra, 0($sp)
@@ -740,7 +760,7 @@ delcategory:
 
     loop:
             ;eax es t3
-            move eax, [edx+12]
+            mov eax, [edx+12]
             mov edi, [edx+8] 
             call sfree
 
@@ -768,7 +788,7 @@ delcategory:
       jne finif4
 
     ;sw $0, cclist #Pongo en 0 a la direccion del primer nodo de la lista de categorias
-      mov [cclist], 0
+      mov dword [cclist], 0
 
     ;j fin3
       jmp fin3
@@ -825,17 +845,20 @@ delcategory:
 
     ;addi $sp, $sp, 4
     ;jr $ra
-      mov esp, ebp
+    mov esp, ebp
     ret
 
-      delobject:
-    mov esb, esp
+
+delobject:
+    mov ebp, esp
     
     mov esi, 0
 
     mov ecx, [wclist]
     cmp ecx, 0
     je finwhile
+  
+
     mov esi, 4
     mov edx, [ecx+4]
     cmp edx, 0
@@ -850,29 +873,31 @@ delcategory:
 
     mov  eax, 3
     mov  ebx, 0
-    mov  ecx, user_input2
-    mov  edx, user_input_length2
+    mov  ecx, user_input
+    mov  edx, user_input_length
     int  80h
     call saltodelinea
 
+
+
+    
     mov esi, 3
     mov ecx, [wclist]
     mov eax, [ecx+4]
 
     mov ebx, [eax+12]
-    mov edx, [eax+0]
+    mov edx, [eax]
     cmp edx, eax
     jne finif2
 
     mov ebx, [eax+4]
-    mov edi, [user_input2]
+    mov edi, [user_input]
+    sub edi, 0x30
     cmp edi, ebx
     jne finwhile
 
-    mov eax, 1 ;no se si esta bien
-    mov [ecx+4], 0
-
-    mov esi, edi
+    mov esi, 1
+    mov dword [ecx+4], 0
 
     mov edi, [eax+8]
     call sfree
@@ -884,7 +909,7 @@ delcategory:
     finif2:
 
     mov ebx, [eax+4]
-    cmp ebx, esi
+    cmp ebx, edi
     jne while
 
     mov edx, [eax+12]
@@ -893,14 +918,15 @@ delcategory:
     mov ecx, eax
 
       while:
-            mov ebx, [eax+1]
-            cmp ebx, esi
+            mov ebx, [eax+4]
+            cmp ebx, edi
             jne finif
+            mov esi, 1
 
-            mov esi, [eax+0]
+            mov ebx, [eax]
             mov edx, [eax+12]
-            mov [esi+12], edx
-            mov [edx+0], esi
+            mov [ebx+12], edx
+            mov [edx], ebx
 
             mov edi, [eax+8]
             call sfree
@@ -920,4 +946,22 @@ delcategory:
       finwhile:
 
       mov esp, ebp
+      ret
+
+smalloc:
+	mov eax, [slist]
+	cmp eax, 0
+	jmp sbrk
+	mov ebx, [eax+12]
+	mov [slist], ebx
+	ret
+sbrk:
+	mov    eax, 45              ;system call brk
+    mov    ebx, 16
+    int    0x80
     ret
+sfree:
+	mov eax, [slist]
+	mov [edi], eax
+	mov [slist], edi
+	ret
