@@ -119,11 +119,11 @@ while2:
       ;-------------------------------------------
 
       mov eax, 0;
-      ;jmp opcion1
-      ;retorno1:
-      ;jmp opcion4
-      ;retorno4:
-      ;jmp finwhile2
+      jmp opcion1
+      retorno1:
+      jmp opcion4
+      retorno4:
+      jmp finwhile2
       mov eax, [user_input]
 
       sub eax, 0x30
@@ -191,8 +191,8 @@ while2:
       pop eax
 
       call newcategory ;Obtengo la nueva categoria            ;PONER UN RET CUANDO HAGAN FUNCIONES CON CALL
-      jmp while2
-      ;jmp retorno1
+      ;jmp while2
+      jmp retorno1
 
       opcion2:
       call nextcategory
@@ -276,8 +276,8 @@ while2:
       ;-------------------------------------------
 
       finif6:
-      jmp while2
-      ;jmp retorno4
+      ;jmp while2
+      jmp retorno4
 
       opcion5:
       call delcategory
@@ -969,7 +969,7 @@ smalloc:
 	mov [slist], ebx
 	ret
 sbrk:
-	  mov eax, 45              ;system call brk
+	mov eax, 45              
     mov ebx, [break]
     add ebx, 16
     int 0x80
