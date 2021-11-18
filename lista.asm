@@ -613,13 +613,6 @@ prevcategory:
 newcategory:
       mov ebp, esp
 
-
-
-      ;move $t7, $a0 #SUPONGO Q A0 ESTA EN EAX
-
-      ;addi $sp, $sp, -4  ¿CREO Q NO ES NECESARIO?
-      ;sw $ra, 0($sp)
-
       mov edx, eax ; para que no se pierda en la llamada
 
       call smalloc
@@ -655,17 +648,11 @@ newcategory:
       mov [wclist], ecx ;Actualizo la direccion de la categoria seleccionada con el nodo nuevo
 
       fin:
-      ;lw $ra,0($sp)
-      ;addi $sp, $sp, 4
-      ;jr $ra
       mov esp, ebp
-      ret ;?
+      ret
 
 newobject:
-	  mov ebp, esp
-      ;addi $sp, $sp, -4
-      ;sw $ra, 0($sp)
-
+	mov ebp, esp
       ;v0 es esi
       mov esi, 0
 
@@ -673,7 +660,6 @@ newobject:
       mov ebx, [wclist] ;Cargo la direccion de la categoria seleccionada
       cmp ebx, 0
       je fin5 ;Verifico si hay algun nodo en la lista de categorias
-      ;DEBERIA GUARDAR EN LA PILA EBX?
 
       mov esi, 4  
       mov ebx, 1  
@@ -694,12 +680,7 @@ newobject:
       mov  edx, 16 ; max length
       int  80h
 
-      ;move $a0, $v0 #Muevo la direccion del bloque obtenido a $a0
-      ;li $v0, 8  #Guardo el nombre de la nueva categoria en el bloque creado
-      ;syscall
-
       ;t7 es ebx
-      ;move $t7, $a0 #Muevo el argumento a un temporal
       mov ebx, eax
 
       call smalloc ;Pido un bloque de memoria
@@ -738,18 +719,12 @@ newobject:
       mov esi, 1
 
       fin5:
-      ;lw $ra,0($sp)
-      ;addi $sp, $sp, 4
-      ;jr $ra
 
       mov esp, ebp
       ret
 
 delcategory:
       mov ebp, esp
-
-    ;addi $sp, $sp, -4
-    ;sw $ra, 0($sp)
 
     ;t6 es ebx 
     ;v0 es esi
@@ -787,77 +762,51 @@ delcategory:
             jmp loop
 
     finloop:
-    ;lw $t7, wclist($0) #Cargo la direccion de la categoria seleccionada
       mov ecx, [wclist]
-    ;lw $t3, cclist($0) #Cargo la direccion del primer nodo de la lista de categorias
       mov eax, [cclist]
 
-    ;lw $t4, 12($t7) #Cargo la direccion del siguiente nodo
       ;edi es t4
       mov edi, [ecx+12]
 
-    ;bne $t4, $t7, finif4 #Si la direccion del siguiente nodo es igual a la categoria seleccionada, es porque hay 1 sola categoria
       cmp edi, ecx
       jne finif4
 
-    ;sw $0, cclist #Pongo en 0 a la direccion del primer nodo de la lista de categorias
       mov dword [cclist], 0
 
-    ;j fin3
       jmp fin3
 
     finif4:
 
-    ;bne $t3, $t7, finif3 #Verifico la categoria a borrar es la primera de la lista
       cmp eax, ecx
       jne finif3
 
-    ;lw $t1, 12($t7) #Cargo la direccion del siguiente nodo
       mov edx, [ecx+12]
-    ;sw $t1, cclist #Actualizo la direccion del primer nodo de la lista de categorias 
       mov [cclist], edx
 
     finif3:
-    ;lw $t1, 12($t7) #Cargo la direccion del siguiente nodo
       mov edx, [ecx+12]
-    ;lw $t2, 0($t7) #Cargo la direccion del nodo anterior
       ;eax pasa a ser t2
       mov eax, [ecx]
 
-    ;sw $t2, 0($t1) #Actualizo la parte de la direccion del nodo anterior del nodo anterior
       mov [edx], eax
-    ;sw $t1, 12($t2) #Actualizo la parte de la direccion del siguiente nodo del nodo siguiente
       mov [eax+12], edx
 
-    ;move $t6, $t1 
       mov ebx, edx
 
     fin3:
-    ;lw $t7, wclist($0) #Cargo la direccion de la categoria seleccionada
       mov ecx, [wclist]
 
-    ;lw $t0, 8($t7) #Cargo la direccion del nodo que contiene el nombre de la categoria
       ;edx pasa a ser t0
       mov edx, [ecx+8]
-    ;move $a0, $t0 
       mov edi, edx
-    ;jal sfree #Libero dicho nodo
       call sfree
 
-    ;move $a0, $t7
       mov edi, ecx
-    ;jal sfree #Libero el nodo de la categoria
       call sfree
 
-    ;sw $t6, wclist($0) #Actualizo la direccion de la categoria seleccionada con la siguiente categoria
       mov [wclist], ebx
 
     fin4:
-
-    ;lw $ra,0($sp)
-
-    ;addi $sp, $sp, 4
-    ;jr $ra
     mov esp, ebp
     ret
 
