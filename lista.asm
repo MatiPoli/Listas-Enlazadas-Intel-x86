@@ -1,9 +1,9 @@
 global _start
 
 section .data
-    slist dd 0
-    cclist dd 0
-    wclist dd 0
+    slist dd 0x00000000
+    cclist dd 0x00000000
+    wclist dd 0x00000000
 
 opc0 db "\n---------------------------------------------------|\nMenu principal: \n1) Crear categoria \n2) Pasar a categoria siguiente \n3) Volver a categoria anterior \n4) Listar categorias \n5) Borrar categoria seleccionada \n6) Anexar un objeto a la categoria seleccionada \n7) Borrar objeto \n8) Listar objetos de la categoria seleccionada \n9) Salir \n\n",0xa, 0xd,'$'
 len0 equ $-opc0
@@ -60,6 +60,7 @@ lenm12 equ $-msj12
 msj13 db "Ha ingresado una opcion incorrecta!",0xa, 0xd,'$'
 lenm13 equ $-msj13
 
+break dd 0x00000000
 
 ast db "*"
 
@@ -110,14 +111,19 @@ while2:
          
       mov  eax, 3 ; sys_read
       mov  ebx, 0 ; stdin
-      mov  ecx, user_input1 ; user input
-      mov  edx, user_input_length1 ; max length
+      mov  ecx, user_input ; user input
+      mov  edx, user_input_length ; max length
       int  80h
       ;-------------------------------------------
       call saltodelinea
       ;-------------------------------------------
 
       mov eax, 0;
+      ;jmp opcion1
+      ;retorno1:
+      ;jmp opcion4
+      ;retorno4:
+      ;jmp finwhile2
       mov eax, [user_input]
 
       sub eax, 0x30
@@ -166,6 +172,7 @@ while2:
       ;-------------------------------------------
       call saltodelinea
 
+
       ;jal smalloc #Pido un bloque de memoria
 
       ;move $a0, $v0 #Muevo la direccion del bloque obtenido a $a0
@@ -173,15 +180,19 @@ while2:
       ;syscall
       ;-------------------------------------------
       call smalloc
+
       push eax
+
       mov  ecx, eax ; user input
       mov  eax, 3 ; sys_read
       mov  ebx, 0 ; stdin
       mov  edx, 16 ; max length
       int  80h
       pop eax
+
       call newcategory ;Obtengo la nueva categoria            ;PONER UN RET CUANDO HAGAN FUNCIONES CON CALL
       jmp while2
+      ;jmp retorno1
 
       opcion2:
       call nextcategory
@@ -266,6 +277,7 @@ while2:
 
       finif6:
       jmp while2
+      ;jmp retorno4
 
       opcion5:
       call delcategory
@@ -464,12 +476,13 @@ listarcategory:
     mov esi, 0
     mov ebp, esp
     mov eax, [cclist]
-    push eax
+
     cmp eax, 0
     je finloop2
     loop2:
-        pop eax
+
         mov ebx, [wclist]
+        mov eax, [cclist]
         cmp eax, ebx
         push eax
         jne finif5
@@ -481,11 +494,11 @@ listarcategory:
         int 0x80
 
         finif5:
-            mov eax, 4
+            
             mov ebx, 1
-            pop eax
+            mov eax, [cclist]
             mov ecx, [eax+8]
-            push eax
+            mov eax, 4
             mov edx, 16
             int 0x80
 
@@ -495,9 +508,9 @@ listarcategory:
             mov edx, lensalto
             int 0x80
 
-            pop eax
+            mov eax, [cclist]
             mov eax, [eax+12]
-            push eax
+
             mov esi, 1
 
             cmp eax, [cclist]
@@ -956,9 +969,11 @@ smalloc:
 	mov [slist], ebx
 	ret
 sbrk:
-	mov    eax, 45              ;system call brk
-    mov    ebx, 16
-    int    0x80
+	  mov eax, 45              ;system call brk
+    mov ebx, [break]
+    add ebx, 16
+    int 0x80
+    mov [break], eax
     ret
 sfree:
 	mov eax, [slist]
